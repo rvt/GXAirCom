@@ -414,35 +414,26 @@ bool setupUbloxConfig(void);
 constexpr uint32_t commonBaudRates[] = {9600, 19200, 38400, 57600, 115200};
 constexpr uint8_t  commonBaudRatesSize = sizeof(commonBaudRates) / sizeof(commonBaudRates[0]);
 
-/* QZSS is disabled becaus this is operational in Japan mostly */
-/* customGPP Setup: enable GPS & Glonass for u-blox 6 & 7 */
-uint8_t setGNSS_U6_7[] PROGMEM = {0x00, 0x00, 0xFF, 0x04,
-                                  0x00, 0x04, 0xFF, 0x00, 0x01, 0x00, 0x01, 0x01,  /* enable GPS */
-                                  0x01, 0x01, 0x03, 0x00, 0x01, 0x00, 0x01, 0x01,  /* enable SBAS */
-                                  0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01,  /* disable QZSS */
-                                  0x06, 0x08, 0xFF, 0x00, 0x00, 0x00, 0x01, 0x01}; /* disable Glonass */
-
-/* customGPP Setup: set NMEA protocol version and numbering for u-blox 6 & 7 */
+/* customGPS Setup: set NMEA protocol version and numbering for u-blox 6 & 7 */
 uint8_t setNMEA_U6_7[] PROGMEM = {0x00, 0x23, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,  /* NMEA protocol v2.3 extended */
                                   0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
                                   0x00, 0x00, 0x00, 0x00};
 
- /* customGPP Setup: set NMEA protocol version and numbering for u-blox 8 */
  /* https://content.arduino.cc/assets/Arduino-MKR-GPS-Shield_u-blox8-M8_ReceiverDescrProtSpec_UBX-13003221_Public.pdf 198 */
 // uint8_t setNMEA_U8_9_10[] PROGMEM = {0x00, 0x40, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,  /* NMEA protocol v4.00 extended */
-//                                       0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
-//                                       0x00, 0x00, 0x00, 0x00};
+//                                      0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
+//                                      0x00, 0x00, 0x00, 0x00};
 uint8_t setNMEA_U8_9_10[] PROGMEM = {0x00, 0x41, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,  /* NMEA protocol v4.10 extended for Galileo */
-                                      0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
-                                      0x00, 0x00, 0x00, 0x00};
+                                     0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
+                                     0x00, 0x00, 0x00, 0x00};
 
- /* customGPP Setup: configure SBAS */
+ /* customGPS Setup: configure SBAS */
 uint8_t setSBAS[] PROGMEM = {0x01, 0x03, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00}; /* disable integrity, enable auto-scan */
 
- /* customGPP Setup: configure PMS */
+ /* customGPS Setup: configure PMS */
 uint8_t setPMS[] PROGMEM = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; /* Full power */
 
- /* customGPP Setup: Rate 200ms */
+ /* customGPS Setup: Rate 200ms */
 uint8_t setCFGRATE[] PROGMEM = {0xC8, 0x00, 0x01, 0x00, 0x01, 0x00}; 
 
 /* UBX-CFG-MSG (NMEA Standard Messages) */
@@ -4387,10 +4378,27 @@ bool setupUbloxConfig(){
         continue;
       }
     } else {
+      // Configure uBlox based on the attached version
+      log_i("ublox: Getting version");
+      uint8_t payloadCfg[MAX_PAYLOAD_SIZE];
+      ubxPacket customCfg = {UBX_CLASS_MON, UBX_MON_VER, 0, 0, 0, payloadCfg, 0, 0, SFE_UBLOX_PACKET_VALIDITY_NOT_DEFINED, SFE_UBLOX_PACKET_VALIDITY_NOT_DEFINED};
+      if (ublox.sendCommand(&customCfg) != SFE_UBLOX_STATUS_DATA_RECEIVED){
+        log_e("ublox: error getting version");
+        continue;
+      }
+
+      uint8_t ubloxType = payloadCfg[33] - '0';
+      if (ubloxType<6) {
+        ubloxType = 6;
+      } else if (ubloxType>10) {
+        ubloxType = 10;
+      }
+      log_i("ublox: Version %d detected", ubloxType);
+
+
       // Set required constellations
       log_i("ublox: Retreive constellations that are enabled");
-      uint8_t payloadCfg[MAX_PAYLOAD_SIZE];
-      ubxPacket customCfg = {UBX_CLASS_CFG, UBX_CFG_GNSS, 0, 0, 0, payloadCfg, 0, 0, SFE_UBLOX_PACKET_VALIDITY_NOT_DEFINED, SFE_UBLOX_PACKET_VALIDITY_NOT_DEFINED};
+      customCfg = {UBX_CLASS_CFG, UBX_CFG_GNSS, 0, 0, 0, payloadCfg, 0, 0, SFE_UBLOX_PACKET_VALIDITY_NOT_DEFINED, SFE_UBLOX_PACKET_VALIDITY_NOT_DEFINED};
       if (ublox.sendCommand(&customCfg) != SFE_UBLOX_STATUS_DATA_RECEIVED){
         log_e("ublox: error getting parameter UBX-CFG-GNSS");
         continue;
@@ -4406,8 +4414,8 @@ bool setupUbloxConfig(){
           if (gnssId == 0x02 && payloadCfg[8+8*ncb] == 0x00) {
             shouldHardReset = true;
           }
-          // Enable GPS=0x00 SBAS=0x01 Galileo=0x02 QZSS=0x05 Glonass=0x06, disable others
-          if (gnssId == 0x00 || gnssId == 0x01 || gnssId == 0x02 || gnssId == 0x05 || gnssId == 0x06)  {
+          // Enable GPS=0x00 SBAS=0x01 Galileo=0x02 QZSS=0x05 Glonass=0x06, disable glonass for uBlox <8
+          if (gnssId == 0x00 || gnssId == 0x01 || gnssId == 0x02 || gnssId == 0x05 || (gnssId == 0x06 && ubloxType >= 8))  {
             payloadCfg[8+8*ncb] = 0x01;
           } else {
             payloadCfg[8+8*ncb] = 0x00;
@@ -4420,31 +4428,13 @@ bool setupUbloxConfig(){
       }
       delay(650);
 
-      // Configure uBlox based on the attached version
-      log_i("ublox: Getting version");
-      customCfg = {UBX_CLASS_MON, UBX_MON_VER, 0, 0, 0, payloadCfg, 0, 0, SFE_UBLOX_PACKET_VALIDITY_NOT_DEFINED, SFE_UBLOX_PACKET_VALIDITY_NOT_DEFINED};
-      if (ublox.sendCommand(&customCfg) != SFE_UBLOX_STATUS_DATA_RECEIVED){
-        log_e("ublox: error getting version");
-        continue;
-      }
-
-      uint8_t ubloxType = payloadCfg[33] - '0';
-      if (ubloxType<6) {
-        ubloxType = 6;
-      } else if (ubloxType>10) {
-        ubloxType = 10;
-      }
-      log_i("ublox: Version %d detected", ubloxType);
-
       // COnfigure ublox based on the attached version 
       uint8_t *setNMEA=NULL;
       uint8_t lenNMEA=0;
       if (ubloxType == 6 || ubloxType == 7){
         setNMEA = setNMEA_U6_7;
         lenNMEA = sizeof(setNMEA_U6_7);
-      }
-
-      if (ubloxType >= 8 ){
+      } else {
         setNMEA = setNMEA_U8_9_10;
         lenNMEA = sizeof(setNMEA_U8_9_10);
       }
@@ -4491,7 +4481,7 @@ bool setupUbloxConfig(){
           continue;
       }
 
-      log_i("ublox: Configured for customGPP");
+      log_i("ublox: Configured for customGPS");
     }
 
     // Set baudrate faster because we handle more messages in case of strat
