@@ -34,7 +34,7 @@ jobs:
 #          body_path: RELEASE.md
           token: ${{ secrets.token }}
           files: |
-            GxAirCom/*.zip
+            GxAirCom/*
           prerelease: true
 
       - name: Release
@@ -44,5 +44,5 @@ jobs:
 #          body_path: RELEASE.md
           token: ${{ secrets.token }}
           files: |
-            GxAirCom/*.zip
+            GxAirCom/*
           prerelease: false
