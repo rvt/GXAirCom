@@ -21,7 +21,7 @@ def copy_file(*args, **kwargs):
     print(target.split(os.path.sep)[-3])    
     print(version)
     binDir = "bin"
-    if os.getenv('GITHUB_ACTIONS') != 'true':
+    if os.getenv('GITHUB_ACTIONS') == 'true':
         binDir = "artifacts"
         if not os.path.exists(binDir):
             os.mkdir(binDir)
