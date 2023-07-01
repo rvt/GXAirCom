@@ -46,12 +46,12 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: additional
+          name: GxAirCom
           path: |
-            bin/partitions.bin
-            bin/spiffs*.bin
-            bin/readme.txt
-            bin/version.txt
+            artifacts/partitions.bin
+            artifacts/spiffs*.bin
+            artifacts/readme.txt
+            artifacts/version.txt
           if-no-files-found: error
 
   prerelease:
