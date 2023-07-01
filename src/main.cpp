@@ -1892,19 +1892,19 @@ void readPGXCFSentence(const char* data)
 
   // output Fanet 
   if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
-  bool outputFANET = result[0] == '1';
+  bool outputFANET = result[0] != '0';
 
   // output GPS 
   if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
-  bool outputGPS = result[0] == '1';
+  bool outputGPS = result[0] != '0';
 
   // output FLARM 
   if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
-  bool outputFLARM = result[0] == '1';
+  bool outputFLARM = result[0] != '0';
 
   // customGPSConfig
   if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
-  bool customGPSConfig = result[0] == '1';
+  bool customGPSConfig = result[0] != '0';
 
   // Aircraft type
   if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
