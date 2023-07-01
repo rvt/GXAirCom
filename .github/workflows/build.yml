@@ -38,9 +38,25 @@ jobs:
             artifacts/
           if-no-files-found: error
 
+  additional:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: additional
+          path: |
+            bin/partitions.bin
+            bin/spiffs*.bin
+            bin/readme.txt
+            bin/version.txt
+        if-no-files-found: error
+
   prerelease:
     if: ${{ contains(github.event.ref, '-rc') && startsWith(github.ref_type, 'tag')}}
-    needs: build
+    needs: additional
     uses: ./.github/workflows/ci-release.yml
     with:
       prerelease: true

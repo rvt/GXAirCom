@@ -23,7 +23,8 @@ def copy_file(*args, **kwargs):
     binDir = "bin"
     if os.getenv('GITHUB_ACTIONS') != 'true':
         binDir = "artifacts"
-        os.mkdir(binDir)
+        if not os.path.exists(binDir):
+            os.mkdir(binDir)
 
     if filename == "firmware.bin":
         savefile = '{}/firmware_{}_{}.bin'.format(binDir, version,platform)
