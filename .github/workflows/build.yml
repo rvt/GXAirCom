@@ -45,7 +45,7 @@ jobs:
   prerelease:
     # Generate a prerelease when tagged
     # and when the branch name contains -rc
-    if: startsWith(github.ref_type, 'tag')}}
+    if: ${{ startsWith(github.ref_type, 'tag') }}
     #if: ${{ contains(github.event.ref, '-rc') && startsWith(github.ref_type, 'tag')}}
     needs: build
     uses: ./.github/workflows/ci-release.yml
