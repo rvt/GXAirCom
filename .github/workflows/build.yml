@@ -33,7 +33,7 @@ jobs:
 
       - name: Copy required artifacts
         run: |
-          cp bin/partitions.bin bin/spiffs*.bin README.md version.txt artifacts/
+          cp bin/partitions.bin bin/spiffs*.bin README.md bin/version.txt artifacts/
 
       - uses: actions/upload-artifact@v3
         with:
