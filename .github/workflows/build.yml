@@ -28,7 +28,7 @@ jobs:
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
 
-      - name: Build Spiffs
+      - name: Build firmware
         run: pio run
 
       - name: Build Spiffs
