@@ -28,12 +28,15 @@ jobs:
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
 
-      - name: Build PlatformIO Project
+      - name: Build Spiffs
         run: pio run
+
+      - name: Build Spiffs
+        run: pio run -t buildfs
 
       - name: Copy required artifacts
         run: |
-          cp bin/partitions.bin bin/spiffs*.bin README.md bin/version.txt artifacts/
+          cp README.md bin/version.txt artifacts/
 
       - uses: actions/upload-artifact@v3
         with:
