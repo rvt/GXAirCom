@@ -45,7 +45,7 @@ jobs:
 
   prerelease:
     #if: ${{ contains(github.event.ref, '-rc') && startsWith(github.ref_type, 'tag')}}
-    needs: additional
+    needs: build
     uses: ./.github/workflows/ci-release.yml
     with:
       prerelease: true
