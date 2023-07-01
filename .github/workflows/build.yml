@@ -31,7 +31,7 @@ jobs:
       - name: Build PlatformIO Project
         run: pio run
 
-      - name: Build PlatformIO Project
+      - name: Copy required artifacts
         run: |
           cp bin/partitions.bin bin/spiffs*.bin README.md artifacts/
 
@@ -42,9 +42,10 @@ jobs:
             artifacts/
           if-no-files-found: error
 
-
   prerelease:
-    #if: ${{ contains(github.event.ref, '-rc') && startsWith(github.ref_type, 'tag')}}
+    # Generate a prerelease when tagged
+    # or when the branch name contains -rc
+    if: ${{ contains(github.event.ref, '-rc') && startsWith(github.ref_type, 'tag')}}
     needs: build
     uses: ./.github/workflows/ci-release.yml
     with:
