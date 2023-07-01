@@ -27,9 +27,9 @@ def copy_file(*args, **kwargs):
             os.mkdir(binDir)
 
     if filename == "firmware.bin":
-        savefile = '{}/firmware_{}_{}.bin'.format(binDir, version,platform)
+        savefile = '{}/firmware_{}.bin'.format(binDir, platform)
     elif filename == "spiffs.bin":
-        savefile = '{}/spiffs_{}.bin'.format(binDir, version)
+        savefile = '{}/spiffs.bin'.format(binDir)
     else:
         savefile = '{}/{}'.format(binDir, filename)
     print("********  copy file " + target + " to " + savefile + " *******")
