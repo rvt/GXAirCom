@@ -30,3 +30,20 @@ jobs:
 
       - name: Build PlatformIO Project
         run: pio run
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: GxAirCom
+          path: |
+            artifacts/
+          if-no-files-found: error
+
+  prerelease:
+    if: ${{ contains(github.event.ref, '-rc') && startsWith(github.ref_type, 'tag')}}
+    needs: build
+    uses: ./.github/workflows/ci-release.yml
+    with:
+      prerelease: true
+      environment: Prerelease
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
