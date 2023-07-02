@@ -1,0 +1,72 @@
+name: PlatformIO CI
+
+on:
+  push:
+    tags:
+      - '*'
+    branches:
+      - '*'         # matches every branch that doesn't contain a '/'
+      - '*/*'       # matches every branch containing a single '/'
+      - '**'        # matches every branch
+      - '!master'   # excludes master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+
+      - name: Build firmware
+        run: pio run
+
+      - name: Build Spiffs
+        run: pio run -t buildfs
+
+      - name: Copy required artifacts
+        run: |
+          cp README.md bin/version.txt bin/bootloader_dio_40m.bin bin/boot_app0.bin artifacts/
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: GxAirCom
+          path: |
+            artifacts/
+          if-no-files-found: error
+
+  prerelease:
+    # Generate a prerelease when tagged
+    # and when the branch name contains -rc
+    if: ${{ startsWith(github.ref_type, 'tag') }}
+    #if: ${{ contains(github.event.ref, '-rc') && startsWith(github.ref_type, 'tag')}}
+    needs: build
+    uses: ./.github/workflows/ci-release.yml
+    with:
+      prerelease: true
+      environment: Prerelease
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    # Generate a prerelease when tagged
+    # and when the branch name contains -rc
+    if: ${{ startsWith(github.ref_type, 'tag') }}
+    #if: ${{ contains(github.event.ref, '-rc') && startsWith(github.ref_type, 'tag')}}
+    needs: build
+    uses: ./.github/workflows/ci-release.yml
+    with:
+      prerelease: false
+      environment: Release
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
