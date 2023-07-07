@@ -28,8 +28,8 @@ jobs:
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
 
-      - name: Create Stratux version
-        run: sed -i 's/-DVERSION="v\([0-9]\.[0-9]\.[0-9]\)"/-DVERSION="v\1-Stratux"/g' platformio.ini
+      - name: Create Stratux version ${{github.ref_name}}
+        run: sed -i 's/-DVERSION="v\([0-9]\.[0-9]\.[0-9]\)"/-DVERSION="v\1-${github.ref_name}"/g' platformio.ini
 
       - name: Build firmware
         run: pio run
