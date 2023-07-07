@@ -897,6 +897,7 @@ void sendFlarmData(uint32_t tAct){
           tFanetData.altitude = fanet.neighbours[i].altitude;
           tFanetData.climb = fanet.neighbours[i].climb;
           tFanetData.devId = fanet.neighbours[i].devId;
+          tFanetData.addressType = fanet.neighbours[i].addressType;
           tFanetData.heading = fanet.neighbours[i].heading;
           tFanetData.lat = fanet.neighbours[i].lat;
           tFanetData.lon = fanet.neighbours[i].lon;
@@ -1656,12 +1657,13 @@ void printSettings(){
   log_i("Fanet-Pin=%d",setting.fanetpin);
   log_i("external power switch=%d",setting.bHasExtPowerSw);
 
-
   log_i("Serial-output=%d",setting.bOutputSerial);
   log_i("OUTPUT Vario=%d",setting.outputModeVario);
   log_i("OUTPUT FLARM=%d",setting.outputFLARM);
   log_i("OUTPUT GPS=%d",setting.outputGPS);
   log_i("OUTPUT FANET=%d",setting.outputFANET);
+  log_i("Device ID=%s",setting.myDevId);
+  log_i("Device Address Type=%d",setting.myDevIdType);
   
   log_i("WIFI connect=%d",setting.wifi.connect);
   log_i("WIFI SSID=%s",setting.wifi.ssid.c_str());
@@ -1847,75 +1849,87 @@ void testLegacy(){
  * @brief Write a $PGXAC sentence to buffer, this can be used by Stratux (or other device) to validate 
  * (part) of it's configuration. 
  * 
- * @param buffer 
- * @param size 
- * @return int 
  */
 void writePGXCFSentence() {
   char buffer[MAXSTRING];
   // $PGXCF,<version>,<eMode>,<eOutputVario>,<output Fanet>,<output GPS>,<output FLARM>,<customGPSConfig>,<Aircraft Type>,<Address>,<Pilot Name>
   int8_t version = 1;
-  snprintf(buffer, MAXSTRING, "$PGXCF,%d,%d,%d,%d,%d,%d,%d,%d,%s,%s", 
+  snprintf(buffer, MAXSTRING, "$PGXCF,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s,%s", 
     version,
     setting.Mode, setting.outputModeVario,
     setting.outputFANET, setting.outputGPS, setting.outputFLARM,
     setting.customGPSConfig, setting.AircraftType,
-    setting.myDevId.c_str(), setting.PilotName.c_str());
+    setting.myDevIdType, setting.myDevId.c_str(), setting.PilotName.c_str());
   size_t size = flarmDataPort.addChecksum(buffer, MAXSTRING);
   sendData2Client(buffer, size);
 }
 
+/**
+ * @brief Parse a $PGXCF sentence and set the configuration accordingly
+ * This is mainly used for automation of GxAirCom configuration
+ * @param data incomming NMEA sentence
+*/
 void readPGXCFSentence(const char* data)
 {
   constexpr uint8_t BUFFER_SIZE=48;
   char result[BUFFER_SIZE];
-  // Parse $PGXCF,<version>,<eMode>,<eOutputVario>,<output Fanet>,<output GPS>,<output FLARM>,<customGPSConfig>,<Aircraft Type>,<Address>,<Pilot Name>
-  // $PGXCF,1,0,1,0,1,1,1,5,123456,GXAirCom*4C // enable customGPS config mode
-  // $PGXCF,1,0,1,0,1,1,0,5,000000,GXAirCom*7B // Enable default GXAirCom
+  // Parse $PGXCF,<version>,<eMode>,<eOutputVario>,<output Fanet>,<output GPS>,<output FLARM>,<customGPSConfig>,<Aircraft Type>,<Address Type>,<Address>, <Pilot Name>
+  // $PGXCF,1,0,1,0,1,1,1,5,1,F23456,Pilot Name*6A // enable customGPS config mode with ICAO address type
+  // $PGXCF,1,0,1,0,1,1,0,5,2,,GXAirCom*55  // Enable default GXAirCom with FLARM address type default hardware Id
 
   // NMEA type (PGXCF)
-  if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
 
   // Version
-  if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
 
   // only version 1 is supported
   if (strtol(result, NULL, 10) != 1) return; 
 
   // GXAircomMode 
-  if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
   eMode gxMode = (eMode)strtol(result, NULL, 10);
 
   // eOutputVario 
-  if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
   eOutputVario outputModeVario = (eOutputVario)strtol(result, NULL, 10);
 
   // output Fanet 
-  if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
   bool outputFANET = result[0] != '0';
 
   // output GPS 
-  if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
   bool outputGPS = result[0] != '0';
 
   // output FLARM 
-  if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
   bool outputFLARM = result[0] != '0';
 
   // customGPSConfig
-  if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
   bool customGPSConfig = result[0] != '0';
 
   // Aircraft type
-  if ((data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE)), (result[0] == '\0')) return;
-  uint aircraftType = strtol(result, NULL, 10);
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  uint aircraftType = strtol(result, NULL, 16);
+
+  // Address Type 1=ADDRESSTYPE_FLARM or 2=ADDRESSTYPE_ICAO
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  uint8_t myDevIdType = atoi(result) == 0x01?ADDRESSTYPE_ICAO:ADDRESSTYPE_FLARM;
 
   // Address
-  if ((data = MicroNMEA::parseField(data, &result[0], sizeof(result))), (result[0] == '\0')) return;
-  uint32_t deviceId = strtol(result, NULL, 16);
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  String myDevId=""; 
+  if (myDevIdType == ADDRESSTYPE_ICAO) { 
+    myDevId = result;
+  } else {
+    MacAddr hwAddress = fmac.readAddr(true);
+    myDevId = fanet.getDevId(fanet.getDevIdFromMac(&hwAddress));
+  }
 
   // Pilot Name
-  if ((data = MicroNMEA::parseField(data, &result[0], sizeof(result))), (result[0] == '\0')) return;
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE);
   const char* pilotName = result;
 
   // Configure settings
@@ -1926,7 +1940,8 @@ void readPGXCFSentence(const char* data)
   setting.outputFLARM = outputFLARM;
   setting.customGPSConfig = customGPSConfig;
   setting.AircraftType = aircraftType;
-  setting.myDevIdOverride = deviceId;
+  setting.myDevId = myDevId;
+  setting.myDevIdType = myDevIdType;
   setting.PilotName = pilotName;
 
   // Write settings, configure uBLox if needed and re boot
@@ -2549,7 +2564,7 @@ void setup() {
     startOLED();  
   }
   #endif
-  setting.myDevId = "";
+  // setting.myDevId = ""; //MyDevID is now stored on file because it's used together with the addressType
 #ifdef GSM_MODULE
 xGsmMutex = xSemaphoreCreateMutex();
 #endif
@@ -4578,12 +4593,13 @@ void taskStandard(void *pvParameters){
   fanet.setRFMode(setting.RFMode);
   uint8_t radioChip = RADIO_SX1276;
   if (setting.boardType == eBoard::T_BEAM_SX1262) radioChip = RADIO_SX1262;
-  
-  // Set the device to the given deviceId when requested
-  // When they are the same, capable receivers won't see two aircraft at the same location
-  if (setting.myDevIdOverride > 0){
-    fmac.setSoftAddr(setting.myDevIdOverride);
-  } 
+
+  // When the requested Address type is ICAO then the devId of the device must be set to your mode-s address
+  // See Flarm Dataport Specification for details
+  fanet.setAddressType(setting.myDevIdType);
+  if (setting.myDevIdType == ADDRESSTYPE_ICAO) {
+    fmac.setAddr(strtol(setting.myDevId.c_str(), NULL, 16));
+  }
 
   fanet.begin(PinLora_SCK, PinLora_MISO, PinLora_MOSI, PinLora_SS,PinLoraRst, PinLoraDI0,PinLoraGPIO,frequency,14,radioChip);
   fanet.setGPS(status.bHasGPS);
@@ -5080,7 +5096,7 @@ void taskStandard(void *pvParameters){
             MyFanetData.speed = status.GPS_speed; //speed in cm/s --> we need km/h
             if (MyFanetData.speed < 1.0) MyFanetData.speed = 1.0;
           }
-          MyFanetData.addressType = ADDRESSTYPE_OGN;
+          MyFanetData.addressType = fanet.getAddressType();
           if ((status.GPS_speed <= 5.0) && (status.vario.bHasVario)){
             MyFanetData.heading = status.varioHeading;
           }else{
