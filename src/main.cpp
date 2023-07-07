@@ -1921,7 +1921,7 @@ void readPGXCFSentence(const char* data)
   // Address
   data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
   String myDevId=""; 
-  if (myDevIdType == ADDRESSTYPE_ICAO) { 
+  if (strlen(result) > 0) { 
     myDevId = result;
   } else {
     MacAddr hwAddress = fmac.readAddr(true);
