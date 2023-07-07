@@ -1873,7 +1873,7 @@ void readPGXCFSentence(const char* data)
 {
   constexpr uint8_t BUFFER_SIZE=48;
   char result[BUFFER_SIZE];
-  // Parse $PGXCF,<version>,<eMode>,<eOutputVario>,<output Fanet>,<output GPS>,<output FLARM>,<customGPSConfig>,<Aircraft Type>,<Address Type>,<Address>, <Pilot Name>
+  // Parse $PGXCF,<version>,<eMode>,<eOutputVario>,<output Fanet>,<output GPS>,<output FLARM>,<customGPSConfig>,<Aircraft Type (hex)>,<Address Type>,<Address (hex)>, <Pilot Name>
   // $PGXCF,1,0,1,0,1,1,1,5,1,F23456,Pilot Name*6A // enable customGPS config mode with ICAO address type
   // $PGXCF,1,0,1,0,1,1,0,5,2,,GXAirCom*55  // Enable default GXAirCom with FLARM address type default hardware Id
 
@@ -1912,7 +1912,7 @@ void readPGXCFSentence(const char* data)
 
   // Aircraft type
   data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
-  uint aircraftType = strtol(result, NULL, 16);
+  uint8_t aircraftType = strtol(result, NULL, 16);
 
   // Address Type 1=ADDRESSTYPE_FLARM or 2=ADDRESSTYPE_ICAO
   data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
@@ -1922,7 +1922,9 @@ void readPGXCFSentence(const char* data)
   data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
   String myDevId=""; 
   if (strlen(result) > 0) { 
-    myDevId = result;
+    uint32_t devId = strtol(result, NULL, 16);
+    MacAddr address = fanet.getMacFromDevId(devId);
+    myDevId = fanet.getDevId(fanet.getDevIdFromMac(&address));;
   } else {
     MacAddr hwAddress = fmac.readAddr(true);
     myDevId = fanet.getDevId(fanet.getDevIdFromMac(&hwAddress));
