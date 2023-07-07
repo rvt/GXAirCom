@@ -4598,8 +4598,9 @@ void taskStandard(void *pvParameters){
 
   // When the requested Address type is ICAO then the devId of the device must be set to your mode-s address
   // See Flarm Dataport Specification for details
+  // When devId is not set, take the HW Address (default) and this is done automatically
   fanet.setAddressType(setting.myDevIdType);
-  if (setting.myDevIdType == ADDRESSTYPE_ICAO) {
+  if (setting.myDevId.length() == 6) {
     fmac.setAddr(strtol(setting.myDevId.c_str(), NULL, 16));
   }
 
