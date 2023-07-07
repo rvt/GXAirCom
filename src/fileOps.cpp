@@ -18,7 +18,7 @@ void load_configFile(SettingsData* pSetting){
   pSetting->outputGPS = preferences.getUChar("OGPS",1); //
   pSetting->outputFANET = preferences.getUChar("OFANET",1); //
   pSetting->PilotName = preferences.getString("PILOTNAME","");
-  pSetting->myDevId = preferences.getString("myDevId","0"); // When myDevIdType == 2, the default HW will be used so init with 0 is fine
+  pSetting->myDevId = preferences.getString("myDevId",""); 
   pSetting->myDevIdType = preferences.getULong("myDevIdType",2); // Default FLARM
   pSetting->customGPSConfig = preferences.getBool("customGPSConfig",false);
   pSetting->wifi.connect = eWifiMode(preferences.getUChar("WIFI_CONNECT",eWifiMode::CONNECT_NONE)); //
