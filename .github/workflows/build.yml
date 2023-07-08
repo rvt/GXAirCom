@@ -41,7 +41,7 @@ jobs:
 
       - name: Copy required artifacts
         run: |
-          cp README.md platformio.ini bin/version.txt bin/bootloader_dio_40m.bin bin/boot_app0.bin artifacts/
+          cp README.md bin/version.txt bin/bootloader_dio_40m.bin bin/boot_app0.bin artifacts/
 
       - uses: actions/upload-artifact@v3
         with:
