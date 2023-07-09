@@ -33,6 +33,7 @@ jobs:
         run: |
           sed -i 's/-DVERSION="v\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)"/-DVERSION="v\1'-${GITHUB_REF_NAME}'"/g' platformio.ini
           sed -i 's/CORE_DEBUG_LEVEL=[0-9]/CORE_DEBUG_LEVEL=0/g' platformio.ini
+          sed -i 's/eOutput::oBLE/eOutput::oSERIAL/g' src/fileOps.cpp
 
       - name: Build firmware
         run: pio run
