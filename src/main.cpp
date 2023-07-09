@@ -4506,10 +4506,10 @@ bool setupUbloxConfig(){
       log_i("ublox: Configured for customGPS");
     }
 
-    // Set baudrate faster because we handle more messages in case of strat
+    // Set baudrate faster because we handle more messages
     ublox.setSerialRate(GPSBAUDRATE, COM_PORT_UART1);
     NMeaSerial.updateBaudRate(GPSBAUDRATE);
-    delay(500);
+    delay(1500);
 
     if (!ublox.saveConfiguration(3000)){
       log_e("ublox: error saving config");
