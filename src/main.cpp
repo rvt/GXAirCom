@@ -1878,52 +1878,52 @@ void readPGXCFSentence(const char* data)
   // $PGXCF,1,3,0,1,0,1,1,0,5,2,,GXAirCom*4A  // Enable default GXAirCom with FLARM address type default hardware Id
 
   // NMEA type (PGXCF)
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
 
   // Version
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
 
   // only version 1 is supported
   if (strtol(result, NULL, 10) != 1) return; 
 
   // Output mode
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
   eOutput outputMode = (eOutput)strtol(result, NULL, 10);
 
   // GXAircomMode 
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
   eMode gxMode = (eMode)strtol(result, NULL, 10);
 
   // eOutputVario 
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
   eOutputVario outputModeVario = (eOutputVario)strtol(result, NULL, 10);
 
   // output Fanet 
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
   bool outputFANET = result[0] != '0';
 
   // output GPS 
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
   bool outputGPS = result[0] != '0';
 
   // output FLARM 
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
   bool outputFLARM = result[0] != '0';
 
   // customGPSConfig
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
   bool customGPSConfig = result[0] != '0';
 
   // Aircraft type
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
   uint8_t aircraftType = strtol(result, NULL, 16);
 
   // Address Type 1=ADDRESSTYPE_FLARM or 2=ADDRESSTYPE_ICAO
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
   uint8_t myDevIdType = atoi(result) == 0x01?ADDRESSTYPE_ICAO:ADDRESSTYPE_FLARM;
 
   // Address
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
   String myDevId=""; 
   if (strlen(result) > 0) { 
     uint32_t devId = strtol(result, NULL, 16);
@@ -1935,7 +1935,7 @@ void readPGXCFSentence(const char* data)
   }
 
   // Pilot Name
-  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE);
+  data = MicroNMEA::parseField(data, &result[0], MAXSTRING);
   const char* pilotName = result;
 
   // Configure settings
