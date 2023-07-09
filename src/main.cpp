@@ -1872,8 +1872,7 @@ void writePGXCFSentence() {
 */
 void readPGXCFSentence(const char* data)
 {
-  constexpr uint8_t BUFFER_SIZE=48;
-  char result[BUFFER_SIZE];
+  char result[MAXSTRING];
   // Parse $PGXCF,<version>,<Output Serial>,<eMode>,<eOutputVario>,<output Fanet>,<output GPS>,<output FLARM>,<customGPSConfig>,<Aircraft Type (hex)>,<Address Type>,<Address (hex)>, <Pilot Name>
   // $PGXCF,1,0,0,1,0,1,1,1,5,1,F23456,Pilot Name*76 // enable customGPS config mode with ICAO address type
   // $PGXCF,1,3,0,1,0,1,1,0,5,2,,GXAirCom*4A  // Enable default GXAirCom with FLARM address type default hardware Id
