@@ -423,7 +423,7 @@ uint8_t setNMEA_U6_7[] PROGMEM = {0x00, 0x23, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00
 // uint8_t setNMEA_U8_9_10[] PROGMEM = {0x00, 0x40, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,  /* NMEA protocol v4.00 extended */
 //                                      0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
 //                                      0x00, 0x00, 0x00, 0x00};
-uint8_t setNMEA_U8_9_10[] PROGMEM = {0x00, 0x41, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,  /* NMEA protocol v4.10 extended for Galileo */
+uint8_t setNMEA_U8_9_10[] PROGMEM = {0x00, 0x40, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,  /* NMEA protocol v4.00 extended for Galileo */
                                      0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
                                      0x00, 0x00, 0x00, 0x00};
 
@@ -1852,10 +1852,11 @@ void testLegacy(){
  */
 void writePGXCFSentence() {
   char buffer[MAXSTRING];
-  // $PGXCF,<version>,<eMode>,<eOutputVario>,<output Fanet>,<output GPS>,<output FLARM>,<customGPSConfig>,<Aircraft Type>,<Address>,<Pilot Name>
+  // $PGXCF,<version>,<Output Serial>,<eMode>,<eOutputVario>,<output Fanet>,<output GPS>,<output FLARM>,<customGPSConfig>,<Aircraft Type>,<Address>,<Pilot Name>
   int8_t version = 1;
-  snprintf(buffer, MAXSTRING, "$PGXCF,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s,%s", 
+  snprintf(buffer, MAXSTRING, "$PGXCF,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s,%s", 
     version,
+    setting.outputMode,
     setting.Mode, setting.outputModeVario,
     setting.outputFANET, setting.outputGPS, setting.outputFLARM,
     setting.customGPSConfig, setting.AircraftType,
@@ -1873,9 +1874,9 @@ void readPGXCFSentence(const char* data)
 {
   constexpr uint8_t BUFFER_SIZE=48;
   char result[BUFFER_SIZE];
-  // Parse $PGXCF,<version>,<eMode>,<eOutputVario>,<output Fanet>,<output GPS>,<output FLARM>,<customGPSConfig>,<Aircraft Type (hex)>,<Address Type>,<Address (hex)>, <Pilot Name>
-  // $PGXCF,1,0,1,0,1,1,1,5,1,F23456,Pilot Name*6A // enable customGPS config mode with ICAO address type
-  // $PGXCF,1,0,1,0,1,1,0,5,2,,GXAirCom*55  // Enable default GXAirCom with FLARM address type default hardware Id
+  // Parse $PGXCF,<version>,<Output Serial>,<eMode>,<eOutputVario>,<output Fanet>,<output GPS>,<output FLARM>,<customGPSConfig>,<Aircraft Type (hex)>,<Address Type>,<Address (hex)>, <Pilot Name>
+  // $PGXCF,1,0,0,1,0,1,1,1,5,1,F23456,Pilot Name*76 // enable customGPS config mode with ICAO address type
+  // $PGXCF,1,3,0,1,0,1,1,0,5,2,,GXAirCom*4A  // Enable default GXAirCom with FLARM address type default hardware Id
 
   // NMEA type (PGXCF)
   data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
@@ -1885,6 +1886,10 @@ void readPGXCFSentence(const char* data)
 
   // only version 1 is supported
   if (strtol(result, NULL, 10) != 1) return; 
+
+  // Output mode
+  data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
+  eOutput outputMode = (eOutput)strtol(result, NULL, 10);
 
   // GXAircomMode 
   data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
@@ -1935,6 +1940,7 @@ void readPGXCFSentence(const char* data)
   const char* pilotName = result;
 
   // Configure settings
+  setting.outputMode = outputMode;
   setting.Mode = gxMode;
   setting.outputModeVario = outputModeVario;
   setting.outputFANET = outputFANET;
