@@ -423,7 +423,7 @@ uint8_t setNMEA_U6_7[] PROGMEM = {0x00, 0x23, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00
 // uint8_t setNMEA_U8_9_10[] PROGMEM = {0x00, 0x40, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,  /* NMEA protocol v4.00 extended */
 //                                      0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
 //                                      0x00, 0x00, 0x00, 0x00};
-uint8_t setNMEA_U8_9_10[] PROGMEM = {0x00, 0x41, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,  /* NMEA protocol v4.10 extended for Galileo */
+uint8_t setNMEA_U8_9_10[] PROGMEM = {0x00, 0x40, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,  /* NMEA protocol v4.00 extended for Galileo */
                                      0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
                                      0x00, 0x00, 0x00, 0x00};
 
@@ -1856,7 +1856,7 @@ void writePGXCFSentence() {
   int8_t version = 1;
   snprintf(buffer, MAXSTRING, "$PGXCF,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s,%s", 
     version,
-    setting.bOutputSerial,
+    setting.outputMode,
     setting.Mode, setting.outputModeVario,
     setting.outputFANET, setting.outputGPS, setting.outputFLARM,
     setting.customGPSConfig, setting.AircraftType,
@@ -1887,9 +1887,9 @@ void readPGXCFSentence(const char* data)
   // only version 1 is supported
   if (strtol(result, NULL, 10) != 1) return; 
 
-  // Output Serial 
+  // Output mode
   data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
-  bool bOutputSerial = result[0] != '0';
+  eOutput outputMode = (eOutput)strtol(result, NULL, 10);
 
   // GXAircomMode 
   data = MicroNMEA::parseField(data, &result[0], BUFFER_SIZE); if (data == NULL) return;
@@ -1940,7 +1940,7 @@ void readPGXCFSentence(const char* data)
   const char* pilotName = result;
 
   // Configure settings
-  setting.bOutputSerial = bOutputSerial;
+  setting.outputMode = outputMode;
   setting.Mode = gxMode;
   setting.outputModeVario = outputModeVario;
   setting.outputFANET = outputFANET;
