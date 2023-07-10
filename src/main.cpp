@@ -1664,7 +1664,7 @@ void printSettings(){
   log_i("OUTPUT FANET=%d",setting.outputFANET);
   log_i("Device ID=%s",setting.myDevId);
   log_i("Device Address Type=%d",setting.myDevIdType);
-  
+
   log_i("WIFI connect=%d",setting.wifi.connect);
   log_i("WIFI SSID=%s",setting.wifi.ssid.c_str());
   log_i("WIFI PW=%s",setting.wifi.password.c_str());
@@ -1848,13 +1848,13 @@ void testLegacy(){
 /**
  * @brief Write a $PGXAC sentence to buffer, this can be used by Stratux (or other device) to validate 
  * (part) of it's configuration. 
- * 
+ *
  */
 void writePGXCFSentence() {
   char buffer[MAXSTRING];
   // $PGXCF,<version>,<Output Serial>,<eMode>,<eOutputVario>,<output Fanet>,<output GPS>,<output FLARM>,<customGPSConfig>,<Aircraft Type>,<Address>,<Pilot Name>
   int8_t version = 1;
-  snprintf(buffer, MAXSTRING, "$PGXCF,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s,%s", 
+  snprintf(buffer, MAXSTRING, "$PGXCF,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s,%s",
     version,
     setting.outputMode,
     setting.Mode, setting.outputModeVario,
@@ -1890,7 +1890,7 @@ void readPGXCFSentence(const char* data)
   data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
   eOutput outputMode = (eOutput)strtol(result, NULL, 10);
 
-  // GXAircomMode 
+  // GXAircomMode
   data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
   eMode gxMode = (eMode)strtol(result, NULL, 10);
 
@@ -1924,15 +1924,9 @@ void readPGXCFSentence(const char* data)
 
   // Address
   data = MicroNMEA::parseField(data, &result[0], MAXSTRING); if (data == NULL) return;
-  String myDevId=""; 
-  if (strlen(result) > 0) { 
-    uint32_t devId = strtol(result, NULL, 16);
-    MacAddr address = fanet.getMacFromDevId(devId);
-    myDevId = fanet.getDevId(fanet.getDevIdFromMac(&address));;
-  } else {
-    MacAddr hwAddress = fmac.readAddr(true);
-    myDevId = fanet.getDevId(fanet.getDevIdFromMac(&hwAddress));
-  }
+  uint32_t devId = strtol(result, NULL, 16);
+  MacAddr address = devId==0?fmac.readAddr(true):fanet.getMacFromDevId(devId);
+  String myDevId = fanet.getDevId(fanet.getDevIdFromMac(&address));;
 
   // Pilot Name
   data = MicroNMEA::parseField(data, &result[0], MAXSTRING);
@@ -4515,12 +4509,6 @@ bool setupUbloxConfig(){
       log_e("ublox: error saving config");
       continue;
     }else{
-      if (setting.customGPSConfig && shouldHardReset){
-        /* If Galileo was previously disabled, and now enabled, UBX_CFG_GNSS must be followed by UBX_CFG_CF (saveConfiguration) and then followed by UBX_CFG_RST */
-        delay(50);
-        log_i("Hard reset to enable Galileo");
-        ublox.hardReset();
-      }
       log_i("!!! setup ublox successfully");
       return true;
     }
