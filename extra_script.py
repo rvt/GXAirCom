@@ -11,7 +11,7 @@ def get_build_flag_value(flag_name):
 def copy_file(*args, **kwargs):
     print("Copying file output to project directory...")
     version = get_build_flag_value("VERSION")
-    version = version[1:-1]
+    version = '_{}'.format(version[1:-1])
     target = str(kwargs['target'][0])
     savename = target.split(os.path.sep)[-1]   # name of environment
     platform = target.split(os.path.sep)[-2]
@@ -20,12 +20,19 @@ def copy_file(*args, **kwargs):
     print(target.split(os.path.sep)[-2])    
     print(target.split(os.path.sep)[-3])    
     print(version)
+    binDir = "bin"
+    if os.getenv('GITHUB_ACTIONS') == 'true':
+        binDir = "artifacts"
+        version = ""
+        if not os.path.exists(binDir):
+            os.mkdir(binDir)
+
     if filename == "firmware.bin":
-        savefile = 'bin/firmware_{}_{}.bin'.format(version,platform)
+        savefile = '{}/firmware{}_{}.bin'.format(binDir, version, platform)
     elif filename == "spiffs.bin":
-        savefile = 'bin/spiffs_{}.bin'.format(version)
+        savefile = '{}/spiffs{}.bin'.format(binDir, version)
     else:
-        savefile = 'bin/{}'.format(filename)
+        savefile = '{}/{}'.format(binDir, filename)
     print("********  copy file " + target + " to " + savefile + " *******")
     copyfile(target, savefile)
     f = open("bin/_version.txt", "w")

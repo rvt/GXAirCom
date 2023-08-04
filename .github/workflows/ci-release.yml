@@ -1,0 +1,48 @@
+name: Generate Release or Prerelease
+
+on:
+  workflow_call:
+    inputs:
+      prerelease:
+        description: "prerelease"
+        required: true
+        default: true
+        type: boolean
+      environment:
+        description: "environment"
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+
+jobs:
+  release:
+    permissions:
+      actions: write
+      contents: write
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v3
+
+      - name: PreRelease
+        if: ${{ startsWith(inputs.prerelease, true) }}
+        uses: softprops/action-gh-release@v1
+        with:
+#          body_path: RELEASE.md
+          token: ${{ secrets.token }}
+          files: |
+            GxAirCom/*
+          prerelease: true
+
+      - name: Release
+        if: ${{ startsWith(inputs.prerelease, false) }}
+        uses: softprops/action-gh-release@v1
+        with:
+#          body_path: RELEASE.md
+          token: ${{ secrets.token }}
+          files: |
+            GxAirCom/*
+          prerelease: false
