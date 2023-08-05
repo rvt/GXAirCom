@@ -12,7 +12,7 @@ to use them in flight as they are not always fully tested.
 ### How to install:
 To install this version of GxAirCom run the following command in your linux terminal:
 
-`export TAG="#TAGNAME#";curl -s https://raw.githubusercontent.com/rvt/GXAirCom/develop/install-GxAirCom.sh | sudo bash`
+`export TAG="#TAGNAME#";curl -s https://raw.githubusercontent.com/rvt/GXAirCom/develop/install-GxAirCom.sh | sudo -E bash`
 
 If you require any specific version manualy:
 

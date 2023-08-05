@@ -14,7 +14,9 @@ trap cleanup EXIT
 mkdir /tmp/GxAirCom
 cd /tmp/GxAirCom
 
-echo "Installling GxAirCom $version"
+echo "####################################################"
+echo "# Installling : GxAirCom $version"
+echo "####################################################"
 
 for artifact in "firmware_psRam.bin" "spiffs.bin" "partitions.bin" "bootloader_dio_40m.bin" "boot_app0.bin" ; do
     wget -N https://github.com/rvt/GXAirCom/releases/download/$version/$artifact
