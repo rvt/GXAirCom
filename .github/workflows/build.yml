@@ -35,11 +35,11 @@ jobs:
           sed -i 's/CORE_DEBUG_LEVEL=[0-9]/CORE_DEBUG_LEVEL=0/g' platformio.ini
           sed -i 's/eOutput::oBLE/eOutput::oSERIAL/g' src/fileOps.cpp
 
-      - name: Build firmware
-        run: pio run
-
-      - name: Build Spiffs
-        run: pio run -t buildfs
+#      - name: Build firmware
+#        run: pio run
+#
+#      - name: Build Spiffs
+#        run: pio run -t buildfs
 
       - name: Copy required artifacts
         run: |
