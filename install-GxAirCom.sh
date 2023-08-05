@@ -21,4 +21,4 @@ wget -N https://raw.githubusercontent.com/pjalocha/esp32-ogn-tracker/master/espt
 wget -N https://raw.githubusercontent.com/b3nn0/stratux/master/GxAirCom/install-GxAirCom-Stratux-firmware.sh
 chmod 0755 install-GxAirCom-Stratux-firmware.sh
 
-./install-GxAirCom-Stratux-firmware.sh
+sudo ./install-GxAirCom-Stratux-firmware.sh

@@ -52,6 +52,13 @@ jobs:
             artifacts/
           if-no-files-found: error
 
+      - uses: actions/upload-artifact@v3
+          with:
+            name: additional
+            path: |
+              .github/release.md
+            if-no-files-found: error
+
   prerelease:
     # Generate a prerelease when tagged
     # and when the branch name contains -rc
