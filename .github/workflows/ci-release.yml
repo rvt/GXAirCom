@@ -27,11 +27,15 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
 
+      - name: Generate Release SHA
+        run: |
+          awk -v tagname="$GITHUB_REF_NAME" '{ gsub(/#TAGNAME#/, tagname); print > "tmpfile" }' additional/release.md && mv tmpfile additional/release.md
+            
       - name: PreRelease
         if: ${{ startsWith(inputs.prerelease, true) }}
         uses: softprops/action-gh-release@v1
         with:
-#          body_path: RELEASE.md
+          body_path: additional/release.md
           token: ${{ secrets.token }}
           files: |
             GxAirCom/*
@@ -41,7 +45,7 @@ jobs:
         if: ${{ startsWith(inputs.prerelease, false) }}
         uses: softprops/action-gh-release@v1
         with:
-#          body_path: RELEASE.md
+          body_path: additional/release.md
           token: ${{ secrets.token }}
           files: |
             GxAirCom/*
