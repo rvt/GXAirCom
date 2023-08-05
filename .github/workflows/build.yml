@@ -26,8 +26,8 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install PlatformIO Core
-        run: pip install --upgrade platformio
+#      - name: Install PlatformIO Core
+#        run: pip install --upgrade platformio
 
       - name: Create Stratux version ${{github.ref_name}}
         run: |
@@ -45,12 +45,12 @@ jobs:
 #        run: |
 #          cp README.md bin/version.txt bin/bootloader_dio_40m.bin bin/boot_app0.bin artifacts/
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: GxAirCom
-          path: |
-            artifacts/
-          if-no-files-found: error
+#      - uses: actions/upload-artifact@v3
+#        with:
+#          name: GxAirCom
+#          path: |
+#            artifacts/
+#          if-no-files-found: error
 
       - uses: actions/upload-artifact@v3
         with:
