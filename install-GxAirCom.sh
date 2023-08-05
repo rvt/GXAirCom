@@ -26,3 +26,7 @@ wget -N https://raw.githubusercontent.com/b3nn0/stratux/master/GxAirCom/install-
 chmod 0755 install-GxAirCom-Stratux-firmware.sh
 
 sudo ./install-GxAirCom-Stratux-firmware.sh
+
+echo "####################################################"
+echo "# Installed : GxAirCom $version"
+echo "####################################################"
