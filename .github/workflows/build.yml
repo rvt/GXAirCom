@@ -41,9 +41,9 @@ jobs:
 #      - name: Build Spiffs
 #        run: pio run -t buildfs
 
-      - name: Copy required artifacts
-        run: |
-          cp README.md bin/version.txt bin/bootloader_dio_40m.bin bin/boot_app0.bin artifacts/
+#      - name: Copy required artifacts
+#        run: |
+#          cp README.md bin/version.txt bin/bootloader_dio_40m.bin bin/boot_app0.bin artifacts/
 
       - uses: actions/upload-artifact@v3
         with:
