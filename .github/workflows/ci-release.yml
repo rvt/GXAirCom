@@ -28,8 +28,8 @@ jobs:
       - uses: actions/download-artifact@v3
 
       - name: Generate Release SHA
-          run: |
-            awk -v tagname="$GITHUB_REF_NAME" '{ gsub(/#TAGNAME#/, tagname); print > "tmpfile" }' additional/release.md && mv tmpfile additional/release.md
+        run: |
+          awk -v tagname="$GITHUB_REF_NAME" '{ gsub(/#TAGNAME#/, tagname); print > "tmpfile" }' additional/release.md && mv tmpfile additional/release.md
             
       - name: PreRelease
         if: ${{ startsWith(inputs.prerelease, true) }}
