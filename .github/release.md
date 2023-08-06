@@ -12,6 +12,10 @@ to use them in flight as they are not always fully tested.
 ### How to install:
 To install this version of GxAirCom run the following command in your linux terminal:
 
+first bring your system at the right time, or else certificates will be invalid:
+`sudo systemctl start systemd-timesyncd`
+
+Download and install GxAirCom:
 `export TAG="#TAGNAME#";curl -s https://raw.githubusercontent.com/rvt/GXAirCom/develop/install-GxAirCom.sh | sudo -E bash`
 
 If you require any specific version manualy:
