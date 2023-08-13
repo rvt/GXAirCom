@@ -803,7 +803,8 @@ void handleButton(uint32_t tAct){
 void sendFlarmData(uint32_t tAct){
   if (WebUpdateRunning) return;
   static uint32_t tSend = millis();
-  static uint32_t tSendStatus = millis();
+  static uint32_t tFlarmSendStatus = millis();
+  static uint32_t tPflavSendStatus = millis();
   FlarmtrackingData myFlarmData;
   FlarmtrackingData PilotFlarmData;
   FanetLora::trackingData tFanetData;  
@@ -811,12 +812,18 @@ void sendFlarmData(uint32_t tAct){
 
   if (!setting.outputFLARM) return;
 
-  if (timeOver(tAct,tSendStatus,FLARM_UPDATE_STATE)){
-    tSendStatus = tAct;
+  if (timeOver(tAct,tPflavSendStatus,PFLAV_UPDATE_STATE)){
+    tPflavSendStatus = tAct;
     char sOut[MAXSTRING];
     int pos = 0;
     pos = flarmDataPort.writeVersion(sOut,MAXSTRING);
     sendData2Client(sOut,pos);
+  }
+
+  if (timeOver(tAct,tFlarmSendStatus,FLARM_UPDATE_STATE)){
+    tPflavSendStatus = tAct;
+    char sOut[MAXSTRING];
+    int pos = 0;
     pos = flarmDataPort.writeSelfTestResult(sOut,MAXSTRING);
     sendData2Client(sOut,pos);
   }
