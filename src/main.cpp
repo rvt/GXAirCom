@@ -813,7 +813,7 @@ void sendFlarmData(uint32_t tAct){
   if (!setting.outputFLARM) return;
 
   if (timeOver(tAct,tPflavSendStatus,PFLAV_UPDATE_STATE)){
-    tPflavSendStatus = tAct;
+    tFlarmSendStatus = tAct;
     char sOut[MAXSTRING];
     int pos = 0;
     pos = flarmDataPort.writeVersion(sOut,MAXSTRING);
